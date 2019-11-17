@@ -2,12 +2,23 @@ if(console){
     var logger = {
         log: console.log,
         info: console.info,
-        warn:console.warn,
+        warn: console.warn,
         error: console.error,
+        includeTime: true,
+        includeLevel: true,
+        includeLabel: true,
+        color: { log: '', info: '', warn: '', error: "" },
         trace: function (tag, args, color) {
+            for (var i in args) {
+                if (typeof args[i] == "object") {
+                    args[i] = JSON.stringify(args[i]);
+                }
+            }
+
             var arr = Array.prototype.slice.call(args);
-            arr.unshift(tag);
-            arr.unshift(new Date().toLocaleString());
+
+            logger.includeLevel && arr.unshift(tag);
+            logger.includeTime && arr.unshift(new Date().toLocaleString());
             arr.unshift('>');
             var text = arr.join("&nbsp;&nbsp;");
             var item = document.createElement('li');
@@ -19,26 +30,36 @@ if(console){
                 debug.scrollTop = debug.scrollHeight;
             }
             return text;
+        },
+        clear: function () {
+            var debug = document.getElementById("console");
+            if (debug) {
+                debug.innerText = "";
+            }
         }
     };
 
     console.log = function () {
         logger.log.apply(console, arguments);
-        logger.trace("[LOG]", arguments,'#8DDAF0');
+        logger.trace("[LOG]", arguments, logger.color.log || '#8DDAF0');
     };
 
     console.info = function () {
         logger.info.apply(console, arguments);
-        logger.trace("[INFO]", arguments,'#35AD83');
+        logger.trace("[INFO]", arguments, logger.color.info || '#35AD83');
     };
 
     console.warn = function () {
         logger.warn.apply(console, arguments);
-        logger.trace("[WARN]", arguments, '#FDDC03');
+        logger.trace("[WARN]", arguments, logger.color.warn || '#FDDC03');
     };
 
     console.error = function () {
         logger.error.apply(console, arguments);
-        logger.trace("[ERROR]", arguments, '#F25745');
+        logger.trace("[ERROR]", arguments, logger.color.error || '#F25745');
     }
+
+    console.clear = function () {
+        logger.clear();
+    };
 }
